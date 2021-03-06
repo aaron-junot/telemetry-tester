@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import os
 import pwd
+import socket
 import subprocess
 import sys
 
@@ -62,5 +63,30 @@ log['file']['delete']['username'] = pwd.getpwuid(os.getuid()).pw_name
 log['file']['delete']['process_name'] = sys.argv[0]
 log['file']['delete']['command_line'] = ' '.join(sys.argv)
 log['file']['delete']['process_id'] = os.getpid()
+
+post_data = b'POST /post HTTP/1.1\nHost: httpbin.org\n\ntest'
+dest_port = 80
+source_port = 31415
+source_address = socket.gethostbyname(socket.gethostname())
+dest_address = socket.gethostbyname('httpbin.org')
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(('0.0.0.0', source_port))
+s.connect((dest_address, dest_port))
+network_timestamp, _ = (datetime.now(), s.sendall(post_data))
+data = s.recv(1024)
+s.close()
+
+log['network']['time_stamp'] = str(network_timestamp)
+log['network']['username'] = pwd.getpwuid(os.getuid()).pw_name
+log['network']['destination_address'] = dest_address
+log['network']['destination_port'] = dest_port
+log['network']['source_address'] = source_address
+log['network']['source_port'] = source_port
+log['network']['data_size'] = len(post_data)
+log['network']['data_protocol'] = "TCP" # socket.SOCK_STREAM is always TCP
+log['network']['process_name'] = sys.argv[0]
+log['network']['command_line'] = ' '.join(sys.argv)
+log['network']['process_id'] = os.getpid()
+
 
 print(json.dumps(log))
