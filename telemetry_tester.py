@@ -6,6 +6,7 @@ import socket
 import subprocess
 import sys
 
+# Validations
 if len(sys.argv) != 2:
     print(
         """Usage: python telemetry_tester.py [config.json]
@@ -52,8 +53,10 @@ if type(file_info) != dict:
     )
     exit(1)
 
+# Start the log
 log = {"process": {}, "file": {"create": {}, "modify": {}, "delete": {}}, "network": {}}
 
+# Start a process and log the info about it
 timestamp, sp = (datetime.now().isoformat(), subprocess.Popen(command))
 log["process"]["time_stamp"] = str(timestamp)
 log["process"]["username"] = pwd.getpwuid(os.getuid()).pw_name
@@ -61,6 +64,7 @@ log["process"]["process_name"] = command[0]
 log["process"]["command_line"] = " ".join(command)
 log["process"]["process_id"] = sp.pid
 
+# Create a file and log that
 file_name = config["file"].get("name") or "test"
 file_type = config["file"].get("type") or "csv"
 file_location = config["file"].get("location") or os.getcwd()
@@ -81,6 +85,7 @@ log["file"]["create"]["process_id"] = os.getpid()
 
 f.close()
 
+# Modify the file and log that
 f = open(file_location, "a")
 modify_timestamp, _ = (datetime.now().isoformat(), f.write("test1,test2,test3"))
 
@@ -93,6 +98,7 @@ log["file"]["modify"]["process_id"] = os.getpid()
 
 f.close()
 
+# Delete the file and log that
 delete_timestamp, _ = (datetime.now().isoformat(), os.remove(file_location))
 
 log["file"]["delete"]["time_stamp"] = str(delete_timestamp)
@@ -102,6 +108,7 @@ log["file"]["delete"]["process_name"] = sys.argv[0]
 log["file"]["delete"]["command_line"] = " ".join(sys.argv)
 log["file"]["delete"]["process_id"] = os.getpid()
 
+# Start a network connection and log it
 post_data = b"POST /post HTTP/1.1\nHost: httpbin.org\n\ntest"
 dest_port = 80
 source_port = 31415
@@ -126,5 +133,5 @@ log["network"]["process_name"] = sys.argv[0]
 log["network"]["command_line"] = " ".join(sys.argv)
 log["network"]["process_id"] = os.getpid()
 
-
+# Share the log with the user
 print(json.dumps(log))
