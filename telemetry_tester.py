@@ -6,7 +6,41 @@ import socket
 import subprocess
 import sys
 
-args = sys.argv[1:]
+if (len(sys.argv) != 2):
+    print(
+"""Usage: python telemetry_tester.py [config.json]
+
+Please specify a single configuration file.
+""", file=sys.stderr)
+    exit(1)
+
+try:
+    config = json.load(open(sys.argv[1]))
+except FileNotFoundError:
+    print("File Not Found: please specify a valid JSON configuration file", file=sys.stderr)
+    exit(1)
+except json.decoder.JSONDecodeError as j:
+    print("Error loading json:", file=sys.stderr)
+    print(str(j), file=sys.stderr)
+    exit(1)
+except Exception as e:
+    print(f"Something went wrong: {e}", file=sys.stderr)
+    exit(1)
+
+command = config['command']
+file_info = config['file']
+
+if type(command) != list or not all(type(s) == str for s in command):
+    print(f"""Invalid command:
+    Expected: list of strings
+    got: type: {type(config['command'])}, value: {config['command']}""", file=sys.stderr)
+    exit(1)
+if type(file_info) != dict:
+    print(f"""Invalid file:
+    Expected: dict
+    got: {type(file_info)}""", file=sys.stderr)
+    exit(1)
+
 log = {
     "process":{},
     "file": {
@@ -17,21 +51,22 @@ log = {
     "network":{}
 }
 
-timestamp, sp = (datetime.now(), subprocess.Popen(args))
+timestamp, sp = (datetime.now(), subprocess.Popen(command))
 log['process']['time_stamp'] = str(timestamp)
 log['process']['username'] = pwd.getpwuid(os.getuid()).pw_name
-log['process']['process_name'] = args[0]
-log['process']['command_line'] = ' '.join(args)
+log['process']['process_name'] = command[0]
+log['process']['command_line'] = ' '.join(command)
 log['process']['process_id'] = sp.pid
 
-file_name = "test"
-file_type = "csv"
-file_location = f"{os.getcwd()}/{file_name}.{file_type}"
+file_name = config['file'].get('name') or 'test'
+file_type = config['file'].get('type') or 'csv'
+file_location = config['file'].get('location') or os.getcwd()
+file_location = f"{file_location}/{file_name}.{file_type}"
 
 try:
     file_timestamp, f = (datetime.now(), open(file_location, "x"))
 except FileExistsError:
-    print(f"The file {file_location} already exists!")
+    print(f"The file {file_location} already exists!", file=sys.stderr)
     exit()
 
 log['file']['create']['time_stamp'] = str(file_timestamp)

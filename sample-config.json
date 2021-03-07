@@ -1,0 +1,9 @@
+{
+    "command": ["echo", "hello telemetry tester"],
+    "file": {
+        "name": "test",
+        "type": "csv",
+        "location": "."
+    }
+}
+
