@@ -51,7 +51,7 @@ log = {
     "network":{}
 }
 
-timestamp, sp = (datetime.now(), subprocess.Popen(command))
+timestamp, sp = (datetime.now().isoformat(), subprocess.Popen(command))
 log['process']['time_stamp'] = str(timestamp)
 log['process']['username'] = pwd.getpwuid(os.getuid()).pw_name
 log['process']['process_name'] = command[0]
@@ -64,7 +64,7 @@ file_location = config['file'].get('location') or os.getcwd()
 file_location = f"{file_location}/{file_name}.{file_type}"
 
 try:
-    file_timestamp, f = (datetime.now(), open(file_location, "x"))
+    file_timestamp, f = (datetime.now().isoformat(), open(file_location, "x"))
 except FileExistsError:
     print(f"The file {file_location} already exists!", file=sys.stderr)
     exit()
@@ -79,7 +79,7 @@ log['file']['create']['process_id'] = os.getpid()
 f.close()
 
 f = open(file_location, "a")
-modify_timestamp, _ = (datetime.now(), f.write("test1,test2,test3"))
+modify_timestamp, _ = (datetime.now().isoformat(), f.write("test1,test2,test3"))
 
 log['file']['modify']['time_stamp'] = str(modify_timestamp)
 log['file']['modify']['path'] = file_location
@@ -90,7 +90,7 @@ log['file']['modify']['process_id'] = os.getpid()
 
 f.close()
 
-delete_timestamp, _ = (datetime.now(), os.remove(file_location))
+delete_timestamp, _ = (datetime.now().isoformat(), os.remove(file_location))
 
 log['file']['delete']['time_stamp'] = str(delete_timestamp)
 log['file']['delete']['path'] = file_location
@@ -107,7 +107,7 @@ dest_address = socket.gethostbyname('httpbin.org')
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('0.0.0.0', source_port))
 s.connect((dest_address, dest_port))
-network_timestamp, _ = (datetime.now(), s.sendall(post_data))
+network_timestamp, _ = (datetime.now().isoformat(), s.sendall(post_data))
 data = s.recv(1024)
 s.close()
 
