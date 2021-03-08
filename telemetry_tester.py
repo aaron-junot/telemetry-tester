@@ -134,4 +134,4 @@ log["network"]["command_line"] = " ".join(sys.argv)
 log["network"]["process_id"] = os.getpid()
 
 # Share the log with the user
-print(json.dumps(log))
+print(json.dumps(log, sort_keys=True, indent=4))
