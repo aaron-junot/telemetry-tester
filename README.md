@@ -86,3 +86,5 @@ Right now, there are no configuration options for the network connection. It wou
 
 Also, when the file is modified, it is always modified by adding the same string. It would be nice to let the user specify that as well.
 
+Note: Windows is not supported in its current form. The `subprocess` module doesn't work with the current syntax, and `pwd` is not available on Windows. With some slight modifications, it can be made to run on Windows, but does not currently.
+
